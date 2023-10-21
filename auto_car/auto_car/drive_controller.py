@@ -10,21 +10,18 @@ from pop import Pilot
 
 
 class DriveController(Node):
-    # khoảng cách giữa trục bánh trước và trục bánh sau
-    # wheel_base = 260    # thông số độ dài cần theo đơn vị mét
     wheel_base = 0.12   # 12 cm, lấy từ file URDF. Cần đo lại?
 
     # tham số mô hình động học
-    a_bm = 1           # theo thông số nsx, tốc độ tối đa là 1.5 m/s, lấy 99/1.5 = 66
+    a_bm = 0.015           # theo thông số nsx, tốc độ tối đa là 1.5 m/s, lấy 99/1.5 = 66
     # a_bm = 0.66         # nếu động cơ xuất từ 0 tới 0.99 thì a_bm = 0.66
-    b_bm = 0            # chỗ này có thể cần xem lại
-    a_fm = 1    # nếu bị bẻ lái ngược thì sửa lại thành -pi/4
-    b_fm = 0            # nếu động cơ lái bị lệch thì mới != 0
+    b_bm = 0.0            # chỗ này có thể cần xem lại
+    a_fm = math.pi/4    # nếu bị bẻ lái ngược thì sửa lại thành -pi/4
+    b_fm = 0.0            # nếu động cơ lái bị lệch thì mới != 0
 
     def __init__(self):
         super().__init__('drive_controller')
         self.get_logger().info("Node Started")
-
         # Dữ liệu sử dụng lại giữa các lần lấy mẫu
         self.msg_odom = Odometry()
         self.yaw = 0.0
@@ -36,11 +33,11 @@ class DriveController(Node):
         self.msg_odom.child_frame_id = "base_link"      # hệ quy chiếu đích
         self.msg_odom.pose.pose.position.x = 0.0        # vị trí - x
         self.msg_odom.pose.pose.position.y = 0.0        # vị trí - y
-        self.msg_odom.pose.pose.position.z = 0.032      # vị trí - z
+        self.msg_odom.pose.pose.position.z = 0.0      # vị trí - z      0.032 
         self.msg_odom.pose.pose.orientation.x = 0.0     # quaternion phép xoay hệ quy chiếu - x
         self.msg_odom.pose.pose.orientation.y = 0.0     # quaternion phép xoay hệ quy chiếu - y
         self.msg_odom.pose.pose.orientation.z = 0.0     # quaternion phép xoay hệ quy chiếu - z
-        self.msg_odom.pose.pose.orientation.w = 1.0     # quaternion phép xoay hệ quy chiếu - w
+        self.msg_odom.pose.pose.orientation.w = 0.0     # quaternion phép xoay hệ quy chiếu - w     1.0
         self.msg_odom.twist.twist.linear.x = 0.0        # tốc độ tịnh tiến (được quyết định bởi động cơ sau)
         self.msg_odom.twist.twist.linear.y = 0.0        # tốc độ tịnh tiến theo phương ngang hông xe (odometry xe không đo được)
         self.msg_odom.twist.twist.linear.z = 0.0        # tốc độ tịnh tiến theo phương thẳng đứng (odometry xe không đo được)
