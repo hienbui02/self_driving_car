@@ -20,21 +20,20 @@ class ps4controller(Controller):
         super().__init__('ps4controller')
         Controller.__init__(self, **kwargs)
 
-    def on_L1_press(self):
-        global fork
-        fork = 1
-    
-    def on_R1_release(self):
-        global fork
-        fork = 0
-
     def on_R1_press(self):
+        global fork
+        if fork == 0:
+            fork = 1
+        else:
+            fork = 0
+    
+    def on_L1_press(self):
         global crossroads
-        crossroads = 1
-
-    def on_R1_release(self):
-        global crossroads
-        crossroads = 0
+        if crossroads == 0:
+            crossroads = 1
+        else:
+            crossroads = 0
+    
                    
     def on_square_press(self):
         print("capture")
@@ -104,16 +103,20 @@ def driver_thread(name):
     status = ""
     while(True):
         if crossroads == 1:
-            Car.setPixelDisplay(2**7, [0,255,0])
-        elif fork == 1:
-            Car.setPixelDisplay(2**7, [0,0,255])
+            Car.setPixelDisplay(2**0, [255,0,0])
+        else:
+            Car.setPixelDisplay(2**0, [0,0,0])
+
+        if fork == 1:
+            Car.setPixelDisplay(2**7, [255,0,0])
         else:
             Car.setPixelDisplay(2**7, [0,0,0])
+
         
         if capture == 1:
             Car.alarm(scale=4, pitch = 8, duration = 0.3)
-            Car.setPixelDisplay(2**3, [255,0,0])
-            time.sleep(0.3)
+            Car.setPixelDisplay(2**3, [0,255,0])
+            time.sleep(0.1)
             Car.setPixelDisplay(2**3, [0,0,0])
             ret, frame = camera.read()
             if crossroads == 1:
@@ -122,8 +125,8 @@ def driver_thread(name):
                 status = "fork"
             else:
                 status = "line"
-            cv2.imwrite(os.path.join(path , f'{max}_{status}.jpg'), frame)
             max = max + 1
+            cv2.imwrite(os.path.join(path , f'{max}_{status}.jpg'), frame)
             capture = 0    
     
 def check_file_number(path):
@@ -140,11 +143,11 @@ def main(args=None):
     t2 = threading.Thread(target=driver_thread, args=(1,))
     t1.start()
     t2.start()
-    # rclpy.init(args=args)
-    # drive_control = DriveController()
-    # rclpy.spin(drive_control)
-    # drive_control.destroy_node()
-    # rclpy.shutdown()
+    rclpy.init(args=args)
+    drive_control = DriveController()
+    rclpy.spin(drive_control)
+    drive_control.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == "__main__":
     main()

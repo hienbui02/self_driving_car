@@ -89,7 +89,7 @@ def camera_thread(name):
         if (capture == 1):
             ret, frame = camera.read()
             Car.alarm(scale=4, pitch = 8, duration = 0.3)
-            Car.setPixelDisplay(2**3, [255,0,0])
+            Car.setPixelDisplay(2**3, [0,255,0])
             time.sleep(0.3)
             Car.setPixelDisplay(2**3, [0,0,0])
             cv2.imwrite(os.path.join(path , f'{max}.jpg'), frame)
@@ -110,11 +110,11 @@ def main(args=None):
     t2 = threading.Thread(target=camera_thread, args=(1,))
     t1.start()
     t2.start()
-    # rclpy.init(args=args)
-    # drive_control = DriveController()
-    # rclpy.spin(drive_control)
-    # drive_control.destroy_node()
-    # rclpy.shutdown()
+    rclpy.init(args=args)
+    drive_control = DriveController()
+    rclpy.spin(drive_control)
+    drive_control.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == "__main__":
     main()
