@@ -26,7 +26,9 @@ class ps4controller(Controller):
             fork = 1
         else:
             fork = 0
-    
+    def read_events(self):
+        print("asdfsadf")
+
     def on_L1_press(self):
         global crossroads
         if crossroads == 0:
@@ -85,13 +87,20 @@ class DriveController(Node):
         self.cmd_vel_pub.publish(my_msg)
 
 def ps4_thread(name):
+    a = 0
     while(True):
         try:   
-            controller = ps4controller(interface="/dev/input/js1").listen(timeout=5)
-            break
+            controller = ps4controller(interface=f"/dev/input/js{a}").listen(timeout=5)
         except:
-            controller = ps4controller(interface="/dev/input/js0").listen(timeout=5)
-            break
+            if a == 0:
+                a = 1
+            else:
+                a = 0
+
+            
+        
+                
+    
             
 def driver_thread(name):
     Util.enable_imshow()
