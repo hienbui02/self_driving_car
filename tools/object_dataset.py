@@ -3,15 +3,28 @@ import rclpy
 from geometry_msgs.msg import Twist
 from rclpy.node import Node
 import threading
+import cv2
+from pop import Util, Pilot
+import os
+import time
 
 speed = 0.0
 steering =0.0
-class ps4controller(Controller):
+capture = 0
+turn_left = 0
+turn_right = 0
+path = '/home/soda/Documents/car/self_driving_car/tools/object'
 
+class ps4controller(Controller):
     def __init__(self, **kwargs):
         super().__init__('ps4controller')
         Controller.__init__(self, **kwargs)
-    
+
+    def on_square_press(self):
+        print("capture")
+        global capture
+        capture = 1
+        
     def on_L3_y_at_rest(self):
         global speed
         speed = 0.0
@@ -45,7 +58,7 @@ class DriveController(Node):
         super().__init__('drive_controller')
         self.get_logger().info("Node Started")
         self.cmd_vel_pub = self.create_publisher(Twist, "/cmd_vel", 10) 
-        timer_period = 0.03 
+        timer_period = 0.03
         self.timer = self.create_timer(timer_period, self.cmd_vel_callback)
         
     def cmd_vel_callback(self):
@@ -55,21 +68,53 @@ class DriveController(Node):
         global steering
         my_msg.angular.z = steering
         self.cmd_vel_pub.publish(my_msg)
-        self.get_logger().info(f"Commanding liner ={speed} and angular ={steering}")
-
 
 def ps4_thread(name):
-    ps4control = ps4controller(interface="/dev/input/js0").listen()
+    while(True):
+        try:   
+            controller = ps4controller(interface="/dev/input/js1").listen(timeout=5)
+            break
+        except:
+            controller = ps4controller(interface="/dev/input/js0").listen(timeout=5)
+            break
+            
+def camera_thread(name):
+    Util.enable_imshow()
+    Car = Pilot.AutoCar()
+    gstr = Util.gstrmer(width =640, height= 480, fps =30, flip =0)
+    camera = cv2.VideoCapture(gstr, cv2.CAP_GSTREAMER)    
+    global capture
+    max = check_file_number(path)
+    while(True):
+        if (capture == 1):
+            ret, frame = camera.read()
+            Car.alarm(scale=4, pitch = 8, duration = 0.3)
+            Car.setPixelDisplay(2**3, [255,0,0])
+            time.sleep(0.3)
+            Car.setPixelDisplay(2**3, [0,0,0])
+            cv2.imwrite(os.path.join(path , f'{max}.jpg'), frame)
+            max = max + 1
+            capture = 0
+
+def check_file_number(path):
+    file_list = os.listdir(path)
+    max_number = 0
+    for file in file_list:
+        number = int(file.split('_')[0])
+        if number > max_number:
+            max_number = number
+    return max_number
 
 def main(args=None):
     t1 = threading.Thread(target=ps4_thread, args=(1,))
-    
+    t2 = threading.Thread(target=camera_thread, args=(1,))
     t1.start()
-    rclpy.init(args=args)
-    drive_control = DriveController()
-    rclpy.spin(drive_control)
-    drive_control.destroy_node()
-    rclpy.shutdown()
+    t2.start()
+    # rclpy.init(args=args)
+    # drive_control = DriveController()
+    # rclpy.spin(drive_control)
+    # drive_control.destroy_node()
+    # rclpy.shutdown()
 
 if __name__ == "__main__":
     main()
