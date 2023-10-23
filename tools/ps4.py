@@ -107,10 +107,12 @@ class MyController(Controller):
     def __init__(self, **kwargs):
         Controller.__init__(self, **kwargs)
 while True:
+    a = 0
     try:    # try - except ở đây để khi dừng bằng Ctrl+C không báo lỗi
-        controller = MyController(interface="/dev/input/js0").listen(timeout=10)
-        break
+        controller = MyController(interface=f"/dev/input/js{a}").listen(timeout=10)
     except:
-        print("js0")
-        controller = MyController(interface="/dev/input/js1").listen(timeout=10)
-        break
+        print("disconnect")
+        if a == 0:
+            a = 1
+        else:
+            a = 0

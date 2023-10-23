@@ -56,7 +56,15 @@ class DriveController(Node):
 
 
 def thread_function(threadname):
-    ps4control = ps4controller(interface="/dev/input/js0").listen()
+    a = 0
+    while(True):
+        try:   
+            controller = ps4controller(interface=f"/dev/input/js{a}").listen(timeout=5)
+        except:
+            if a == 0:
+                a = 1
+            else:
+                a = 0
 
 def main(args=None):
     t1 = threading.Thread(target=thread_function, args=(1,))
