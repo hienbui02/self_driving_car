@@ -87,15 +87,11 @@ class DriveController(Node):
         self.cmd_vel_pub.publish(my_msg)
 
 def ps4_thread(name):
-    a = 0
     while(True):
         try:   
-            controller = ps4controller(interface=f"/dev/input/js{a}").listen(timeout=5)
+            controller = ps4controller(interface="/dev/input/js0").listen(timeout=5)
         except:
-            if a == 0:
-                a = 1
-            else:
-                a = 0
+            print("disconnect")
 
             
         
