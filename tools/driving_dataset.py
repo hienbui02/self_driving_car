@@ -83,15 +83,12 @@ class DriveController(Node):
         self.cmd_vel_pub.publish(my_msg)
 
 def ps4_thread(name):
-    a = 0
     while(True):
         try:   
-            controller = ps4controller(interface=f"/dev/input/js{a}").listen(timeout=5)
+            controller = ps4controller(interface="/dev/input/js0").listen(timeout=5)
         except:
-            if a == 0:
-                a = 1
-            else:
-                a = 0
+            print("disconnect")
+
 
 def camera_thread(name):
     Util.enable_imshow()
@@ -127,11 +124,11 @@ def main(args=None):
     t2 = threading.Thread(target=camera_thread, args=(1,))
     t1.start()
     t2.start()
-    # rclpy.init(args=args)
-    # drive_control = DriveController()
-    # rclpy.spin(drive_control)
-    # drive_control.destroy_node()
-    # rclpy.shutdown()
+    rclpy.init(args=args)
+    drive_control = DriveController()
+    rclpy.spin(drive_control)
+    drive_control.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == "__main__":
     main()

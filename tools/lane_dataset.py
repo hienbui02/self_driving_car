@@ -92,11 +92,6 @@ def ps4_thread(name):
             controller = ps4controller(interface="/dev/input/js0").listen(timeout=5)
         except:
             print("disconnect")
-
-            
-        
-                
-    
             
 def driver_thread(name):
     Util.enable_imshow()
@@ -150,7 +145,10 @@ def main(args=None):
     t2.start()
     rclpy.init(args=args)
     drive_control = DriveController()
-    rclpy.spin(drive_control)
+    try:    
+        rclpy.spin(drive_control)
+    except KeyboardInterrupt:
+        pass
     drive_control.destroy_node()
     rclpy.shutdown()
 

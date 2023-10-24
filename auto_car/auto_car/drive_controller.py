@@ -8,7 +8,6 @@ from sensor_msgs.msg import JointState
 from tf2_ros import TransformBroadcaster
 from pop import Pilot
 
-
 class DriveController(Node):
     wheel_base = 0.12   # 12 cm, lấy từ file URDF. Cần đo lại?
 

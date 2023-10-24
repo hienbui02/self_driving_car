@@ -70,16 +70,11 @@ class DriveController(Node):
         self.cmd_vel_pub.publish(my_msg)
 
 def ps4_thread(name):
-    a = 0
     while(True):
         try:   
-            controller = ps4controller(interface=f"/dev/input/js{a}").listen(timeout=5)
+            controller = ps4controller(interface=f"/dev/input/js0").listen(timeout=5)
         except:
-            if a == 0:
-                a = 1
-            else:
-                a = 0
-
+            print("Disconnect PS4")
             
 def camera_thread(name):
     Util.enable_imshow()
@@ -95,8 +90,8 @@ def camera_thread(name):
             Car.setPixelDisplay(2**3, [0,255,0])
             time.sleep(0.3)
             Car.setPixelDisplay(2**3, [0,0,0])
-            cv2.imwrite(os.path.join(path , f'{max}.jpg'), frame)
             max = max + 1
+            cv2.imwrite(os.path.join(path , f'{max}_object.jpg'), frame)
             capture = 0
 
 def check_file_number(path):
