@@ -9,7 +9,7 @@ gps_status = 0
 class SocketIOListener(Node):
     def __init__(self):
         super().__init__('socketio_listener')
-        self.SERVER_SOCKETIO = "http://192.168.200.184:5001"
+        self.SERVER_SOCKETIO = "http://10.10.11.93:5001"
         self.ID = "robot1"
         self.NAME = "123"
         self.auto_publisher = self.create_publisher(Bool, '/automatic', 10)
@@ -81,10 +81,9 @@ def main(args=None):
         socketio_listener.start()
     except KeyboardInterrupt:
         pass
-    finally:
-        socketio_listener.stop()
-        socketio_listener.destroy_node()
-        rclpy.shutdown()
+    socketio_listener.stop()
+    socketio_listener.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
