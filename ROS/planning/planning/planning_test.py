@@ -8,15 +8,15 @@ import threading
 import time
 
 gps_data = [0.0,0.0]
-gps_status = False
-automatic = False
+gps_status = True
+automatic = True
 max_speed = 60
 speed = 0.0
 steering = 0.0
 n_bins = int(12) # 4, 8, 12, 16
 distance = 1500
-safe_distance = 800
-width_of_bin_0 = 400
+safe_distance = 1000
+width_of_bin_0 = 500
 
 class DriveController(Node):
     def __init__(self):
@@ -131,11 +131,12 @@ def check_distance(lat_end, lon_end, c, lon_start):
     c = 2 * math.atan2(math.sqrt(angle), math.sqrt(1 - angle))
     R = 6371000  # Approximate radius of the Earth in meters
     distance = R * c 
+    print(distance)
     if distance < 5:
         return True
     return False 
  
-def gotoPlace(Car, lidar, lat_end, lon_end, lat_start, lon_start):
+def go_place(Car, lidar, lat_end, lon_end, lat_start, lon_start):
     global max_speed, n_bins, gps_status
     angle_of_b = 360/n_bins
     
@@ -196,16 +197,18 @@ def gotoPlace(Car, lidar, lat_end, lon_end, lat_start, lon_start):
         speed = max_speed*3/5    
     else:
         speed = 0.0  
+    print(f"bin_id: {bin_id}, can quay {angle}, da quay {Car.getEuler('yaw')-current_angle}")
+    print(f"steering: {steering}, safety: {safety}")    
     return steering, speed
     
 def set_lights( Car, l_start, l_end, color):
     if color == "red":
         for i in range(l_start,l_end):
             Car.setPixelDisplay(2**i,255,0,0)   
-    elif color == "blue":
+    elif color == "green":
         for i in range(l_start,l_end):
             Car.setPixelDisplay(2**i,0,255,0)  
-    elif color == "green":
+    elif color == "blue":
         for i in range(l_start,l_end):
             Car.setPixelDisplay(2**i,0,0,255)  
     else:
@@ -213,53 +216,58 @@ def set_lights( Car, l_start, l_end, color):
             Car.setPixelDisplay(2**i,0,0,0)         
             
 def controller_thread():
-        global automatic, speed, steering, gps_data
-        Car = Pilot.AutoCar()
-        Car.setObstacleDistance(distance=0)
-        Car.setSensorStatus(euler=1)
-        lidar = LiDAR.Rplidar()
-        lidar.connect()
-        lidar.startMotor()
-        places = [[21.047939828195936, 105.80094216574687],[21.0483257655548, 105.80093777817802],[21.048348287067167, 105.80070414013677]]
-        while True:
-            if automatic and gps_status:
-                for place in places:
-                    lat_end = math.radians(place[0])
-                    lon_end = math.radians(place[1])
-                    lat_start = math.radians(gps_data[0])
-                    lon_start = math.radians(gps_data[1])
-                    if check_distance(lat_end, lon_end, lat_start, lon_start):
-                        steering, speed = gotoPlace(Car, lidar, lat_end, lon_end, lat_start, lon_start)
-                    else: 
-                        speed = 0.0
-                        steering = 0.0  
-                    
-                    if speed > 0:      
-                        if steering > 0:
-                            set_lights( Car, 4, 8, 'red')
-                        elif steering < 0:
-                            set_lights( Car, 0, 4, 'red')
-                        else:
-                            set_lights( Car, 0, 8, 'white')
+    print("start controller")
+    global automatic, speed, steering, gps_data
+    Car = Pilot.AutoCar()
+    Car.setObstacleDistance(distance=0)
+    Car.setSensorStatus(euler=1)
+    lidar = LiDAR.Rplidar()
+    lidar.connect()
+    lidar.startMotor()
+    places = [[21.047939828195936, 105.80094216574687],[21.0483257655548, 105.80093777817802],[21.048348287067167, 105.80070414013677]]
+    while True:
+        if automatic and gps_status:
+            for place in places:
+                print("go to place")
+                lat_end = math.radians(place[0])
+                lon_end = math.radians(place[1])
+                lat_start = math.radians(gps_data[0])
+                lon_start = math.radians(gps_data[1])
+                print(lat_end)
+                print(lon_end)
+                print(lat_start)
+                print(lon_start)
+                print(not check_distance(lat_end, lon_end, lat_start, lon_start))
+                if not check_distance(lat_end, lon_end, lat_start, lon_start):
+                    steering, speed = go_place(Car, lidar, lat_end, lon_end, lat_start, lon_start)
+                    print("chua toi dich")
+                else: 
+                    speed = 0.0
+                    steering = 0.0  
+                
+                if speed > 0:      
+                    if steering > 0:
+                        set_lights( Car, 4, 8, 'red')
+                    elif steering < 0:
+                        set_lights( Car, 0, 4, 'red')
                     else:
-                        set_lights( Car, 0, 8, 'blue')
-            
-            if not gps_status:
-                set_lights( Car, 0, 8, 'green')
-
-            else:
-                set_lights( Car, 0, 8, 'white')
-               
-                    
-            # Car.steering = steering                       
-            # if speed != 0:
-            #     Car.forward(speed)
-            # else:
-            #     Car.stop()  
-            time.sleep(0.1)            
+                        set_lights( Car, 0, 8, 'white')
+                else:
+                    set_lights( Car, 0, 8, 'blue')
+        if not gps_status:
+            set_lights( Car, 0, 8, 'green')
+        else:
+            set_lights( Car, 0, 8, 'white')
+    
+        Car.steering = steering                       
+        if speed != 0:
+            Car.forward(speed)
+        else:
+            Car.stop()  
+        time.sleep(0.1)            
     
 def main(args=None):
-    controller = threading.Thread(target=controller_thread, args=(1,))
+    controller = threading.Thread(target=controller_thread)
     controller.start()
     rclpy.init(args=args)
     node = DriveController()

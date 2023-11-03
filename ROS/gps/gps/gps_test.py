@@ -3,35 +3,33 @@ from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 import serial
 import threading
-
+import time
 gps_data = [0.0,0.0]
 gps_status = 0
 #upload location
 def read_gps_thread():
     global gps_data, gps_status
-    with serial.Serial('/dev/ttyUSB1', 9600, timeout=5) as ser:
-        while True:
+    while True:
+        with serial.Serial('/dev/ttyUSB1', 9600, timeout=10) as ser:
             data = ""
             print("start thread")
-            gps_status = 0
             x = ser.readline()
             line = x.decode('utf-8', errors='ignore')
             if line.find("localtion") != -1:
                 line = line.replace("\t", "").replace("\n", "")
                 line = line.replace('"', '')
                 data = line.split(":")[1]
-                gps_data[0] = data.split(",")[0]
-                gps_data[1] = data.split(",")[1]
+                gps_data[0] = float(data.split(",")[0])
+                gps_data[1] = float(data.split(",")[1])
                 gps_status = 1
                 ser.close()
-            print(gps_status)
 
 class gps_pubisher(Node):
     def __init__(self, **kwargs):
         super().__init__('gps_node')
         self.get_logger().info("gps Started")
         self.gps_pub = self.create_publisher(Float32MultiArray, "/gps", 10) 
-        timer_period = 0.5
+        timer_period = 0.4
         self.timer = self.create_timer(timer_period, self.gps_callback)
         
     def gps_callback(self):
