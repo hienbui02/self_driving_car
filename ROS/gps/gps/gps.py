@@ -11,7 +11,6 @@ def read_gps_thread():
     while True:
         with serial.Serial('/dev/ttyUSB1', 9600, timeout=10) as ser:
             data = ""
-            print("start thread")
             x = ser.readline()
             line = x.decode('utf-8', errors='ignore')
             if line.find("localtion") != -1:

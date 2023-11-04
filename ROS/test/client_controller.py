@@ -14,7 +14,7 @@ from pop import LiDAR, Pilot
 import time
 import requests
 import threading
-from thread_read_signal import ReadSignal
+#from thread_read_signal import ReadSignal
 
 load_dotenv()
 

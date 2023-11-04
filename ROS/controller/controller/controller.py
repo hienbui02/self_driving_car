@@ -31,6 +31,7 @@ class DriveController(Node):
     def gps_callback(sefl, data_msg = Float32MultiArray):
         global gps_data
         gps_data = data_msg.data[0:2]
+        print(gps_data)
           
     def automatic_callback(self, data_msg: Bool):
         global automatic
@@ -80,17 +81,17 @@ def controller_thread():
                 place = places[place_id]
     
         Car.steering = steering                       
-        if speed != 0:
-            Car.forward(speed)      
-            if steering > 0:
-                set_lights( Car, 4, 8, 'red')
-            elif steering < 0:
-                set_lights( Car, 0, 4, 'red')
-            else:
-                set_lights( Car, 0, 8, 'white')
-        else:
-            set_lights( Car, 0, 8, 'blue')        
-            Car.stop()  
+        # if speed != 0:
+        #     Car.forward(speed)      
+        #     if steering > 0:
+        #         set_lights( Car, 4, 8, 'red')
+        #     elif steering < 0:
+        #         set_lights( Car, 0, 4, 'red')
+        #     else:
+        #         set_lights( Car, 0, 8, 'white')
+        # else:
+        #     set_lights( Car, 0, 8, 'blue')        
+        #     Car.stop()  
         time.sleep(0.1)            
     
 def main(args=None):
