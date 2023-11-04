@@ -5,10 +5,11 @@ import socketio
 from std_msgs.msg import Float32MultiArray
 
 gps_data = [0.0,0.0]
+
 class SocketIOListener(Node):
     def __init__(self):
         super().__init__('socketio_listener')
-        self.SERVER_SOCKETIO = "http://10.10.11.93:5001"
+        self.SERVER_SOCKETIO = "http://10.10.10.201:5001"
         self.ID = "robot1"
         self.NAME = "123"
         self.auto_publisher = self.create_publisher(Bool, '/automatic', 10)
@@ -23,8 +24,6 @@ class SocketIOListener(Node):
         def disconnect():
             self.get_logger().info('Socket.IO disconnected')
             
-        
-        # Define event handlers
         @self.sio.on('connect')
         def on_connect():
             print("Connected to server ...")
@@ -54,7 +53,7 @@ class SocketIOListener(Node):
             else:
                 msg.data = False
             self.auto_publisher.publish(msg)
-            self.get_logger().info('Publishing: "%s"' % msg.data)
+            print(msg)
                  
         @self.sio.on('disconnect')
         def on_disconnect():
@@ -64,15 +63,15 @@ class SocketIOListener(Node):
         global gps_data
         gps_data = data_msg.data[0:2]
         
-        
     def start(self):
-        self.sio.connect(self.SERVER_SOCKETIO) # Replace with your Socket.IO server URL
+        self.sio.connect(self.SERVER_SOCKETIO)
         rclpy.spin(self)
 
     def stop(self):
         self.sio.disconnect()
 
 def main(args=None):
+    
     rclpy.init(args=args)
     socketio_listener = SocketIOListener()
     try:

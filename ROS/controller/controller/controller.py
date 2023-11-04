@@ -81,17 +81,17 @@ def controller_thread():
                 place = places[place_id]
     
         Car.steering = steering                       
-        # if speed != 0:
-        #     Car.forward(speed)      
-        #     if steering > 0:
-        #         set_lights( Car, 4, 8, 'red')
-        #     elif steering < 0:
-        #         set_lights( Car, 0, 4, 'red')
-        #     else:
-        #         set_lights( Car, 0, 8, 'white')
-        # else:
-        #     set_lights( Car, 0, 8, 'blue')        
-        #     Car.stop()  
+        if speed != 0:
+            Car.forward(speed)      
+            if steering > 0:
+                set_lights( Car, 4, 8, 'red')
+            elif steering < 0:
+                set_lights( Car, 0, 4, 'red')
+            else:
+                set_lights( Car, 0, 8, 'white')
+        else:
+            set_lights( Car, 0, 8, 'blue')        
+            Car.stop()  
         time.sleep(0.1)            
     
 def main(args=None):
