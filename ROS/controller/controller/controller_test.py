@@ -6,11 +6,10 @@ from std_msgs.msg import Bool
 from pop import Pilot, LiDAR
 import threading
 import time
-from simulation import simulation
+from planning import local_planning
 
 
 gps_data = [0.0,0.0]
-gps_status = True
 automatic = True
 speed = 0.0
 steering = 0.0
@@ -32,7 +31,6 @@ class DriveController(Node):
     def gps_callback(sefl, data_msg = Float32MultiArray):
         global gps_data, gps_status
         gps_data = data_msg.data[0:2]
-        gps_status = data_msg.data[2]
           
     def automatic_callback(self, data_msg: Bool):
         global automatic
@@ -70,24 +68,16 @@ def controller_thread():
     lidar = LiDAR.Rplidar()
     lidar.connect()
     lidar.startMotor()
-    sim = simulation(distance, safe_distance, width_of_bin_0, max_speed, n_bins, gps_accurate)
+    planning = local_planning(distance, safe_distance, width_of_bin_0, max_speed, n_bins, gps_accurate)
     place = places[place_id]
     while True:
-        if automatic and gps_status:
-            if not sim.check_distance(place[0], place[1], gps_data[0], gps_data[1]):
-                steering, speed = sim.go_place(Car, lidar, place[0], place[1], gps_data[0], gps_data[1])
+        if automatic:
+            if not planning.check_distance(place[0], place[1], gps_data[0], gps_data[1]):
+                steering, speed = planning.go_place(Car, lidar, place[0], place[1], gps_data[0], gps_data[1])
             else:
                 print("next place!")
                 place_id += 1
                 place = places[place_id]
-
-                
-
-        
-        if not gps_status:
-            set_lights( Car, 0, 8, 'green')
-        else:
-            set_lights( Car, 0, 8, 'white')
     
         Car.steering = steering                       
         if speed != 0:

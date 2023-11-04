@@ -5,7 +5,6 @@ import socketio
 from std_msgs.msg import Float32MultiArray
 
 gps_data = [0.0,0.0]
-gps_status = 0
 class SocketIOListener(Node):
     def __init__(self):
         super().__init__('socketio_listener')
@@ -62,9 +61,8 @@ class SocketIOListener(Node):
             print("Disconnected from server")
     
     def gps_callback(self, data_msg: Float32MultiArray):
-        global gps_data, gps_status
+        global gps_data
         gps_data = data_msg.data[0:2]
-        gps_status = data_msg.data[2]
         
         
     def start(self):

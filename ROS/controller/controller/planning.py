@@ -1,5 +1,5 @@
 import math
-class simulation():
+class local_planning():
         # Scan bins 
     def __init__(self, distance, safe_distance, width_of_bin_0, max_speed, n_bins, gps_accurate):
         self.distance = distance

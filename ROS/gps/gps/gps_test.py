@@ -5,10 +5,9 @@ import serial
 import threading
 import time
 gps_data = [0.0,0.0]
-gps_status = 0
 #upload location
 def read_gps_thread():
-    global gps_data, gps_status
+    global gps_data
     while True:
         with serial.Serial('/dev/ttyUSB1', 9600, timeout=10) as ser:
             data = ""
@@ -21,7 +20,6 @@ def read_gps_thread():
                 data = line.split(":")[1]
                 gps_data[0] = float(data.split(",")[0])
                 gps_data[1] = float(data.split(",")[1])
-                gps_status = 1
                 ser.close()
 
 class gps_pubisher(Node):
@@ -33,10 +31,9 @@ class gps_pubisher(Node):
         self.timer = self.create_timer(timer_period, self.gps_callback)
         
     def gps_callback(self):
-        global gps_data, gps_status
+        global gps_data
         my_gps = Float32MultiArray()
         my_gps.data = gps_data
-        my_gps.data.append(gps_status)
         self.gps_pub.publish(my_gps)
         print(my_gps)
 
