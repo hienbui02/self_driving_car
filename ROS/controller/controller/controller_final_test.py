@@ -8,7 +8,7 @@ import threading
 import time
 
 gps_data = [0.0,0.0]
-automatic = True
+automatic = False
 max_speed = 60
 speed = 0.0
 steering = 0.0
@@ -16,6 +16,7 @@ n_bins = int(12) # 4, 8, 12, 16
 distance = 1500
 safe_distance = 1000
 width_of_bin_0 = 500
+max_distance = 5.0
 
 class DriveController(Node):
     def __init__(self):
@@ -39,6 +40,7 @@ class DriveController(Node):
             automatic = True
         else:
             automatic = False
+        print(automatic)
             
     def cmd_vel_callback(self, cmd_vel_msg: Float32MultiArray):
         global speed, steering, automatic
@@ -120,6 +122,7 @@ def compute_desired_bins( beta, n_bins, angle_of_b, bins, safe_bins):
         return bin_id, True
 
 def check_distance(lat_end, lon_end, c, lon_start):
+    global max_distance
     d_lat = lat_end - lat_end
     d_lon = lon_end - lon_start
     angle = math.sin(d_lat / 2) ** 2 + math.cos(lat_end) * math.cos(lat_end) * math.sin(d_lon / 2) ** 2
@@ -127,7 +130,7 @@ def check_distance(lat_end, lon_end, c, lon_start):
     R = 6371000  # Approximate radius of the Earth in meters
     distance = R * c 
     print(distance)
-    if distance < 5:
+    if distance < max_distance:
         return True
     return False 
  
@@ -219,7 +222,7 @@ def controller_thread():
     lidar = LiDAR.Rplidar()
     lidar.connect()
     lidar.startMotor()
-    places = [[21.047939828195936, 105.80094216574687],[21.0483257655548, 105.80093777817802],[21.048348287067167, 105.80070414013677]]    
+    places = [[21.04834105425579, 105.8016542764174],[21.048343381786204, 105.80093602424105],[21.048178127036262, 105.80093353030988]]
     place = places[place_id]
     while True:
         if automatic:
@@ -237,8 +240,6 @@ def controller_thread():
                     place = places[place_id]
                 else:
                     print("stop")
-                    steering = 0.0
-                    speed = 0.0
     
         Car.steering = steering                       
         if speed != 0:

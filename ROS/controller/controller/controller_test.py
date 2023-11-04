@@ -61,7 +61,7 @@ def set_lights( Car, l_start, l_end, color):
 def controller_thread():
     print("start controller")
     global automatic, speed, steering, gps_data
-    places = [[21.047939828195936, 105.80094216574687],[21.0483257655548, 105.80093777817802],[21.048348287067167, 105.80070414013677]]
+    places = [[21.04834105425579, 105.8016542764174],[21.048343381786204, 105.80093602424105],[21.048178127036262, 105.80093353030988]]
     place_id = 0
     Car = Pilot.AutoCar()
     Car.setObstacleDistance(distance=0)

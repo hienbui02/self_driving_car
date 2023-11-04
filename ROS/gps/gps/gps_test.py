@@ -11,7 +11,6 @@ def read_gps_thread():
     while True:
         with serial.Serial('/dev/ttyUSB1', 9600, timeout=10) as ser:
             data = ""
-            print("start thread")
             x = ser.readline()
             line = x.decode('utf-8', errors='ignore')
             if line.find("localtion") != -1:
@@ -27,7 +26,7 @@ class gps_pubisher(Node):
         super().__init__('gps_node')
         self.get_logger().info("gps Started")
         self.gps_pub = self.create_publisher(Float32MultiArray, "/gps", 10) 
-        timer_period = 0.4
+        timer_period = 0.1
         self.timer = self.create_timer(timer_period, self.gps_callback)
         
     def gps_callback(self):
